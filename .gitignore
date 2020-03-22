@@ -1,0 +1,8 @@
+venv/
+*.cfg
+*.pyc
+.DS_Store
+.webassets-cache/
+*/static/gen/
+/sample-data
+*.cfg

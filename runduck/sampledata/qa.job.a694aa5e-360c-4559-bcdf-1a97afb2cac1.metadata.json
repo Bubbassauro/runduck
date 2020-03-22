@@ -1,0 +1,14 @@
+{
+    "id": "a694aa5e-360c-4559-bcdf-1a97afb2cac1",
+    "scheduled": true,
+    "nextScheduledExecution": "2020-03-21T22:05:00Z",
+    "href": "http://sample_location/rundeck/api/24/job/a694aa5e-360c-4559-bcdf-1a97afb2cac1",
+    "averageDuration": 425341,
+    "scheduleEnabled": true,
+    "enabled": true,
+    "permalink": "http://sample_location/rundeck/project/App-Integrations/job/show/a694aa5e-360c-4559-bcdf-1a97afb2cac1",
+    "name": "daily run",
+    "group": "daily runs",
+    "description": "",
+    "project": "App-Integrations"
+}

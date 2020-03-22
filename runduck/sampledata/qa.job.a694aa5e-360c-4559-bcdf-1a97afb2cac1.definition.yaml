@@ -1,0 +1,28 @@
+- defaultTab: summary
+  description: ''
+  executionEnabled: true
+  group: daily runs
+  id: a694aa5e-360c-4559-bcdf-1a97afb2cac1
+  loglevel: INFO
+  name: daily run
+  nodeFilterEditable: false
+  retry:
+    delay: 5m
+    retry: '1'
+  schedule:
+    month: '*'
+    time:
+      hour: '18'
+      minute: '05'
+      seconds: '0'
+    weekday:
+      day: '*'
+    year: '*'
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - description: daily_run
+      exec: source /usr/local/dashboard-scripts/venv/bin/activate && cd /usr/local/dashboard-scripts && python -u -m daily_run
+    keepgoing: false
+    strategy: node-first
+  uuid: a694aa5e-360c-4559-bcdf-1a97afb2cac1
