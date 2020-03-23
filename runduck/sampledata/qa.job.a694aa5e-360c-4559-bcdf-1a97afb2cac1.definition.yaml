@@ -6,6 +6,12 @@
   loglevel: INFO
   name: daily run
   nodeFilterEditable: false
+  notification:
+    onfailure:
+      email:
+        attachLog: true
+        recipients: test@example
+        subject: 'Failure: something failed terribly'
   retry:
     delay: 5m
     retry: '1'

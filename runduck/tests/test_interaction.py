@@ -1,4 +1,4 @@
-"""Test the datareader class
+"""Test the DataInteraction class
 python -m pytest -v -s
 """
 import unittest
@@ -8,8 +8,8 @@ from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
 
 
-class DataReaderTestCase(unittest.TestCase):
-    """Tests for bo_helpers module"""
+class DataInteractionTestCase(unittest.TestCase):
+    """Tests for DataInteraction module"""
 
     # pylint:disable=R0201
     def setUp(self):
@@ -47,7 +47,6 @@ class DataReaderTestCase(unittest.TestCase):
         data = self.interaction.get_filesystem("projects")
         self.interaction.set_redis("projects", data)
 
-    @pytest.mark.skip
     def test_api(self):
         projects = self.interaction.get_api("projects")
         print(projects)
@@ -70,3 +69,11 @@ class DataReaderTestCase(unittest.TestCase):
         assert data_redis["source"] == DataSource.REDIS.value
         # both should have the same info
         assert data_fs["data"] == data_redis["data"]
+
+    @pytest.mark.skip
+    def test_bad_guy(self):
+        """This can be used to test specific failures
+        uncomment skip annotation and run with:
+        python -m pytest -v -s -k bad_guy --disable-pytest-warnings
+        """
+        bad_guy = self.interaction.get_api("job.definition", jobid="cc1f5a09-0c54-4b7e-972d-e5baaba0a1be")

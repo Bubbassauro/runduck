@@ -34,7 +34,7 @@ class DataInteraction(object):
             },
             "jobs": {
                 "format": "json",
-                DataSource.API: "api/14/project/{project}/jobs",
+                DataSource.API: "/api/14/project/{project}/jobs",
                 DataSource.FILE_SYSTEM: "{env}.project.{project}.jobs.json",
                 DataSource.REDIS: {
                     "key": "runduck:{env}:projects:{project}",
@@ -52,7 +52,7 @@ class DataInteraction(object):
             },
             "job.definition": {
                 "format": "yaml",
-                DataSource.API: "/api/1/job/{jobid}?format=yaml",
+                DataSource.API: "/api/1/job/{jobid}",
                 DataSource.FILE_SYSTEM: "{env}.job.{jobid}.definition.yaml",
                 DataSource.REDIS: {
                     "key": "runduck:{env}:jobs:{jobid}",
@@ -84,7 +84,6 @@ class DataInteraction(object):
         base_path = os.path.dirname(os.path.abspath(__file__))
         file_name = self.CONFIG[data_key][DataSource.FILE_SYSTEM].format(**args)
         file_path = f"{base_path}/sampledata/{file_name}"
-        # print(file_path)
         parsed_data = {}
         with open(file_path, "rb") as file_obj:
             if self.CONFIG[data_key]["format"] == "json":
@@ -100,25 +99,32 @@ class DataInteraction(object):
 
     def get_api(self, data_key, **args):
         """Call Rundeck API"""
-        base_url = app.config["ENV"][self.env]["base_url"]
+        base_url = app.config["ENV"][self.env]["base_url"].strip("/")
 
         headers = {}
         params = args if args else {}
         params["authtoken"] = app.config["ENV"][self.env]["authtoken"]
+        response_format = self.CONFIG[data_key]["format"]
 
-        if self.CONFIG[data_key]["format"] == "json":
+        if response_format == "json":
             headers["Accept"] = "application/json"
-        elif self.CONFIG[data_key]["format"] == "yaml":
+        elif response_format == "yaml":
             params["format"] = "yaml"
 
         url = f"{base_url}{self.CONFIG[data_key][DataSource.API]}".format(**params)
+        # print(params)
         resp = requests.get(url, headers=headers, params=params)
         resp.raise_for_status()
-        return resp.json()
+        if response_format == "json":
+            return resp.json()
+        else:
+            # print(str(resp.content))
+            return yaml.safe_load(resp.content)
 
-    def get_redis(self, data_key):
+    def get_redis(self, data_key, **args):
         """Get data from redis data source"""
-        key = self.CONFIG[data_key][DataSource.REDIS]["key"].format(env=self.env)
+        args = self.prepare_args(**args)
+        key = self.CONFIG[data_key][DataSource.REDIS]["key"].format(**args)
         field = self.CONFIG[data_key][DataSource.REDIS]["field"]
 
         raw_data = self.redis.hget(key, field)
@@ -149,12 +155,13 @@ class DataInteraction(object):
         print("\n", pattern)
         self.clear_redis_pattern(pattern)
 
-    def get_data(self, data_key, **args):
+    def get_data(self, data_key, force_refresh=False, **args):
         """Get all the data under a key or call the source to get the data"""
-        source = str(DataSource.REDIS)
-        data = self.get_redis(data_key)
-        if data:
-            return {"source": DataSource.REDIS.value, "data": data}
+        if not force_refresh:
+            source = str(DataSource.REDIS)
+            data = self.get_redis(data_key, **args)
+            if data:
+                return {"source": DataSource.REDIS.value, "data": data}
 
         source = self.live_data_source
         if self.live_data_source == DataSource.FILE_SYSTEM:
