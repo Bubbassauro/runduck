@@ -140,7 +140,6 @@ class DataInteraction(object):
         key = self.CONFIG[data_key][DataSource.REDIS]["key"].format(**args)
         field = self.CONFIG[data_key][DataSource.REDIS]["field"]
         self.redis.hset(key, field, jsonpickle.encode(value))
-        self.redis.expire(key, app.config["REDIS_TTL"])
 
     def clear_redis_pattern(self, pattern):
         """Clear all matching redis keys"""

@@ -2,15 +2,18 @@
 import os
 from flask import json
 from flask import jsonify
+from flask_cors import CORS
 from flask_restplus import Api
 from flask_restplus import Resource
 from flask_restplus import reqparse
 from flask_restplus import inputs
 from runduck import app
 from runduck.datainteraction import DataSource
-from runduck.jobinfo import read_all_data
+from runduck.datainteraction import DataInteraction
+from runduck.jobinfo import read_environment
 
 
+cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 api = Api(app, version="1.0", doc="/api/doc", prefix="/api", validate=False)
 
 parser = reqparse.RequestParser()
@@ -24,6 +27,6 @@ class Projects(Resource):
 
     @api.expect(parser)
     def get(self):
-        args = parser.parse_args()
-        data = read_all_data(live_data_source=DataSource.API, force_refresh=args.get("force_refresh"))
+        interaction = DataInteraction(env="all")
+        data = interaction.get_data("projects")["data"]
         return jsonify(data)
