@@ -86,7 +86,7 @@ def merge_jobs(jobs1, jobs2, env1, env2):
     :param env2: name of the second environment for column suffix
     :type env2: string
 
-    :returns: DataFrame with combined jobs, matched by id + 
+    :returns: DataFrame with combined_projects jobs, matched by id + 
         matched by name that were not matched by id
     """
     df_jobs1 = pd.DataFrame(jobs1)
@@ -119,11 +119,43 @@ def merge_jobs(jobs1, jobs2, env1, env2):
     ])
     # final is matched by id + matched by name that were not matched by id
     matches = pd.concat([id_match, name_except_id], ignore_index=True)
-    
+
     # make column names lowercase
     cols = {col: col.lower() for col in matches.columns.to_list()}
     matches.rename(columns=cols, inplace=True)
     return matches
+
+def merge_projects(projects1, projects2, env1, env2):
+    """Merge projects,
+        prefix columns with project_,
+        make column names lowercase
+    
+    :param projects1: list of projects from environment1
+    :type projects1: array
+    :param projects2: list of projects from environment2
+    :type projects2: array
+    :param env1: name of environment 1 for suffix
+    :type env1: string
+    :param env2: name of environment 2 for suffix
+    :type env2: string
+
+    :returns: DataFrame with outer join of project 1 and 2
+    with columns:
+        ['project_name', 'project_description_qa', 'project_url_prod',
+        'project_description_prod', 'project_url_qa']
+    """
+    df1 = pd.DataFrame(projects1)
+    df2 = pd.DataFrame(projects2)
+    combined_projects = pd.merge(
+        df1, df2,
+        how="outer",
+        on="name",
+        suffixes=(f"_{env1}", f"_{env2}")
+    )
+    # make column names lowercase and prefix with project_
+    cols = {col: f"project_{col.lower()}" for col in combined_projects.columns.to_list()}
+    combined_projects.rename(columns=cols, inplace=True)
+    return combined_projects
 
 def combine_data(live_data_source, force_refresh=False):
     """Read all the data and join
@@ -142,31 +174,43 @@ def combine_data(live_data_source, force_refresh=False):
     interaction2 = DataInteraction(live_data_source=live_data_source, env=env2)
     projects2 = interaction1.get_redis("projects")
 
-    df1 = pd.DataFrame(projects1)
-    df2 = pd.DataFrame(projects2)
-    combined = pd.merge(
-        df1, df2,
-        how="outer",
-        on="name",
-        suffixes=(f"_{env1}", f"_{env2}")
-    )
-    combined.fillna("", inplace=True)
+    combined_projects = merge_projects(projects1, projects2, env1, env2)
 
-    project_list = combined.to_dict(orient='record')
-    # print(project_list)
-    # project = next(iter(project_list))
-    # jobs1 = interaction1.get_redis("jobs", project="App-Integrations")
-    # jobs2 = interaction2.get_redis("jobs", project="App-Integrations")
-    # combined_jobs = merge_jobs(jobs1, jobs2, env1, env2)
-    # print(combined_jobs)
-    for project in project_list:
+    all_jobs = pd.DataFrame()
+    for project in combined_projects.to_dict(orient="records"):
         # print(project["name"], "=" * 30)
-        jobs1 = interaction1.get_redis("jobs", project=project["name"])
-        jobs2 = interaction2.get_redis("jobs", project=project["name"])
+        jobs1 = interaction1.get_redis("jobs", project=project["project_name"])
+        jobs2 = interaction2.get_redis("jobs", project=project["project_name"])
         combined_jobs = merge_jobs(jobs1, jobs2, env1, env2)
 
-        project["jobs"] = combined_jobs.dropna().to_dict(orient="record")
+        # Combine job and project info
+        jobs_projects = pd.merge(
+            combined_jobs,
+            combined_projects,
+            how="left",
+            left_on="project",
+            right_on="project_name"
+        )
 
-    # # Save combined data
+        # Concatenate to the final list
+        if all_jobs.empty:
+            all_jobs = jobs_projects
+        else:
+            all_jobs = pd.concat([all_jobs, jobs_projects], ignore_index=True)
+
+    selected_fields = [
+        "",
+        "group",
+        "id",
+        f"id_{env1}",
+        f"id_{env2}",
+        f"enabled_{env1}",
+        f"enabled_{env2}",
+        f"href_{env1}",
+        f"href_{env2}",
+    ]
+
+    # Save combined_projects data
+    all_list = all_jobs.fillna("").to_dict(orient="record")
     interaction_all = DataInteraction(live_data_source=DataSource.API, env="all")
-    interaction_all.set_redis("projects", project_list)
+    interaction_all.set_redis("projects", all_list)
