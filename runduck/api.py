@@ -27,6 +27,6 @@ class Projects(Resource):
 
     @api.expect(parser)
     def get(self):
-        interaction = DataInteraction(env="all")
-        data = interaction.get_data("projects")
+        interaction = DataInteraction()
+        data = interaction.get_data("combined")
         return jsonify(data)

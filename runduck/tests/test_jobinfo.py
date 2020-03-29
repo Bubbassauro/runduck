@@ -26,26 +26,5 @@ class JobInfoTestCase(unittest.TestCase):
         env = next(iter(app.config["ENV"]))
         assert data[env]
 
-    def test_combine_data(self):
-        data = combine_data(live_data_source=DataSource.API)
-
-    def test_merge_projects(self):
-        projects1 = [
-            {"description": "Administrative jobs", "name": "Admin", "url": "http://qa-url/Admin"},
-            {"description": "Integrations to apps like slack and dynamo", "name": "App-Integrations", "url": "http://qa-url//App-Integrations"}
-        ]
-        projects2 = [
-            {"description": "", "name": "App-Integrations", "url": "http://prod-url/App-Integrations"},
-            {"description": "", "name": "BusinessSystems",  "url": "http://prod-url/BusinessSystems"}
-        ]
-        env1 = "qa"
-        env2 = "prod"
-
-        merged = merge_projects(projects1, projects2, env1, env2)
-        assert set(merged.columns.tolist()) == {
-            'project_name', 'project_description_qa', 'project_url_prod',
-            'project_description_prod', 'project_url_qa'
-        }
-        assert merged.shape[0] == 3
-
+    
 

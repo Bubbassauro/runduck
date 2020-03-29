@@ -59,6 +59,10 @@ class DataInteraction(object):
                     "field": "definition",
                 },
             },
+            "combined": {
+                "format": "json",
+                DataSource.REDIS: {"key": "runduck:all", "field": "combined"},
+            },
         }
 
         self.pool = redis.ConnectionPool(
