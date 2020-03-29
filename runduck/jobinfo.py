@@ -46,9 +46,6 @@ def read_environment(live_data_source, force_refresh=False, env="qa"):
             ).get("data")
             job.update(next(iter(job_definition)))
 
-        # Update back the job list to make it easier to list with all the details
-        interaction.set_redis("jobs", jobs, project=project["name"])
-
     return projects
 
 def read_all_environments(live_data_source, force_refresh=False):
@@ -66,3 +63,15 @@ def read_all_environments(live_data_source, force_refresh=False):
         all_data[env] = read_environment(live_data_source, force_refresh=force_refresh, env=env)
     return all_data
 
+def combine_data():
+    environments = app.config["ENV"]
+
+    main_env = next(iter(environments))
+
+    interaction1 = DataInteraction(env=main_env)
+    projects1 = interaction1.get_redis("projects")
+
+    print(projects1)
+
+    # interaction2 = DataInteraction(live_data_source=live_data_source, env=env2)
+    # projects2 = interaction1.get_redis("projects")

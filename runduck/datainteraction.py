@@ -59,6 +59,7 @@ class DataInteraction(object):
                     "field": "definition",
                 },
             },
+            # This is where all the combined data for the API will be stored (redis only)
             "combined": {
                 "format": "json",
                 DataSource.REDIS: {"key": "runduck:all", "field": "combined"},
