@@ -117,7 +117,7 @@ class DataInteraction(object):
             params["format"] = "yaml"
 
         url = f"{base_url}{self.CONFIG[data_key][DataSource.API]}".format(**params)
-        # print(params)
+        print(url, params)
         resp = requests.get(url, headers=headers, params=params)
         resp.raise_for_status()
         if response_format == "json":
@@ -133,7 +133,7 @@ class DataInteraction(object):
         field = self.CONFIG[data_key][DataSource.REDIS]["field"]
 
         raw_data = self.redis.hget(key, field)
-        if not raw_data:
+        if raw_data is None:
             return None
 
         data = jsonpickle.decode(raw_data)
@@ -164,7 +164,7 @@ class DataInteraction(object):
         if not force_refresh:
             source = str(DataSource.REDIS)
             data = self.get_redis(data_key, **args)
-            if data:
+            if not data is None:
                 return {"source": DataSource.REDIS.value, "data": data}
 
         source = self.live_data_source
