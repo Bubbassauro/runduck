@@ -1,4 +1,5 @@
 """Read information from all jobs"""
+from cron_descriptor import get_description
 from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
 from runduck import app
@@ -87,7 +88,14 @@ def format_schedule_description(schedule):
         if schedule["weekday"].get("day"):
             weekday = schedule["weekday"]["day"]
 
-    formatted = f"{hour}:{minute}:{seconds} on {dayofmonth} of {month} {weekday}"
+    cron = f"{minute} {hour} {dayofmonth} {month} {weekday}"
+
+    try:
+        formatted = get_description(cron)
+    except:
+        formatted = cron
+        raise
+
     return formatted
 
 def append_info(job, project, env, env_order):
@@ -103,6 +111,7 @@ def append_info(job, project, env, env_order):
         "group",
         "name",
         "scheduleEnabled",
+        "executionEnabled",
         "description"
     ]
     for field in fields_to_include:
@@ -114,7 +123,15 @@ def append_info(job, project, env, env_order):
     job_info["env"] = env
     job_info["env_order"] = env_order
     job_info["id"] = f"{env}.{job['id']}"
-    job_info["schedule_description"] = format_schedule_description(job.get("schedule"))
+
+    try:
+        job_info["schedule_description"] = format_schedule_description(job.get("schedule"))
+    except:
+        CRED = '\33[31m'
+        CEND = '\033[0m'
+        print(CRED, f"\nError getting schedule description for {project['name']} / {job['group']} / {job['name']}", CEND)
+        print(job.get("schedule"))
+
     return job_info
 
 def find_job(jobs, job_to_find):
