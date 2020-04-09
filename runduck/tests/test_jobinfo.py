@@ -10,6 +10,7 @@ from runduck.jobinfo import read_all_environments
 from runduck.jobinfo import combine_data
 from runduck.jobinfo import append_info
 from runduck.jobinfo import find_job
+from runduck.jobinfo import get_job_details
 
 class JobInfoTestCase(unittest.TestCase):
     """Tests for  module"""
@@ -75,4 +76,10 @@ class JobInfoTestCase(unittest.TestCase):
             'project': 'Admin', 'group': ''}
         job_by_name = find_job(jobs, job_by_name)
         assert job_by_name["id"] == 'prod.54e63594-d520-42f0-8ec9-bbb3651fab43'
-append_info
+
+    def test_get_job_details(self):
+        job_id = "a694aa5e-360c-4559-bcdf-1a97afb2cac1"
+        env = "qa"
+        job_details = get_job_details(
+            env=env, job_id=job_id, live_data_source=DataSource.FILE_SYSTEM)
+        print(job_details)

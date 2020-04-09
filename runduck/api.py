@@ -11,6 +11,7 @@ from runduck import app
 from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
 from runduck.jobinfo import read_environment
+from runduck.jobinfo import get_job_details
 
 
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -29,4 +30,11 @@ class Projects(Resource):
     def get(self):
         interaction = DataInteraction()
         data = interaction.get_data("combined")
+        return jsonify(data)
+
+@api.route("/job/<string:env>/<string:jobid>")
+class Job(Resource):
+    """Get details of a job"""
+    def get(self, env, jobid):
+        data = get_job_details(env=env, job_id=jobid)
         return jsonify(data)
