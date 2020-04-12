@@ -145,16 +145,18 @@ def find_job(jobs, job_to_find):
             return job
     return None
 
-def get_job_details(env, job_id, live_data_source=DataSource.API):
+def get_job_details(env, job_id, live_data_source=DataSource.API, force_refresh=False):
     """Get details of one job"""
     interaction = DataInteraction(live_data_source=live_data_source, env=env)
     job_metadata = interaction.get_data(
         "job.metadata",
+        force_refresh=force_refresh,
         jobid=job_id
     ).get("data")
 
     job_definition = interaction.get_data(
         "job.definition",
+        force_refresh=force_refresh,
         jobid=job_id
     ).get("data")
     job_metadata.update(next(iter(job_definition)))

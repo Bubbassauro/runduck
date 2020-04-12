@@ -5,6 +5,8 @@ import yaml
 import redis
 import requests
 import jsonpickle
+import pytz
+from datetime import datetime
 from enum import Enum
 from runduck import app
 
@@ -16,6 +18,10 @@ class DataSource(Enum):
     FILE_SYSTEM = "fs"
     REDIS = "redis"
 
+def get_now_str():
+    """Get the current timestamp"""
+    now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
+    return f"{now_utc:%Y-%m-%dT%H:%M:%S%z}"
 
 class DataInteraction(object):
     """Common object to read data from redis or from file system or API"""
@@ -48,7 +54,7 @@ class DataInteraction(object):
                 DataSource.REDIS: {
                     "key": "runduck:{env}:jobs:{jobid}",
                     "field": "metadata",
-                },
+                }
             },
             "job.definition": {
                 "format": "yaml",
@@ -144,6 +150,11 @@ class DataInteraction(object):
         args = self.prepare_args(**args)
         key = self.CONFIG[data_key][DataSource.REDIS]["key"].format(**args)
         field = self.CONFIG[data_key][DataSource.REDIS]["field"]
+
+        # Append a timestamp if value is a dictionary
+        if isinstance(value, dict):
+            value["updated"] = get_now_str()
+
         self.redis.hset(key, field, jsonpickle.encode(value))
 
     def clear_redis_pattern(self, pattern):

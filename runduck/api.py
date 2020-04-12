@@ -31,8 +31,10 @@ class Jobs(Resource):
         """
         List all jobs from all environments
         """
+        args = parser.parse_args()
+        force_refresh = args.get("force_refresh", False)
         interaction = DataInteraction()
-        data = interaction.get_data("combined")
+        data = interaction.get_data("combined", force_refresh=force_refresh)
         return jsonify(data)
 
 @api.route("/jobs/combine")
@@ -44,15 +46,20 @@ class JobsCombine(Resource):
         This takes a few seconds if the raw data is already cached, it will
         take several minutes if the data is being refreshed from the source
         """
-        combine_data()
+        args = parser.parse_args()
+        force_refresh = args.get("force_refresh", False)
+        combine_data(force_refresh=force_refresh)
         return jsonify({"message": "Data successfully combined"})
 
 @api.route("/job/<string:env>/<string:jobid>")
 class Job(Resource):
     """Get details of a job"""
+    @api.expect(parser)
     def get(self, env, jobid):
         """
         Get details of one job in a specific environment
         """
-        data = get_job_details(env=env, job_id=jobid)
+        args = parser.parse_args()
+        force_refresh = args.get("force_refresh", False)
+        data = get_job_details(env=env, job_id=jobid, force_refresh=force_refresh)
         return jsonify(data)

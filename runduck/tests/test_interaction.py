@@ -3,9 +3,11 @@ python -m pytest -v -s
 """
 import unittest
 import pytest
+from unittest.mock import patch
 from runduck import app
 from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
+from runduck.datainteraction import get_now_str
 
 
 class DataInteractionTestCase(unittest.TestCase):
@@ -77,3 +79,7 @@ class DataInteractionTestCase(unittest.TestCase):
         python -m pytest -v -s -k bad_guy --disable-pytest-warnings
         """
         bad_guy = self.interaction.get_api("job.definition", jobid="cc1f5a09-0c54-4b7e-972d-e5baaba0a1be")
+
+    def test_get_now_str(self):
+        now_str = get_now_str()
+        assert len(now_str) == 22
