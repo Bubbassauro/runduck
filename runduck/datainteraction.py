@@ -117,7 +117,7 @@ class DataInteraction(object):
             params["format"] = "yaml"
 
         url = f"{base_url}{self.CONFIG[data_key][DataSource.API]}".format(**params)
-        print(url, params)
+        # print(url, params)
         resp = requests.get(url, headers=headers, params=params)
         resp.raise_for_status()
         if response_format == "json":
