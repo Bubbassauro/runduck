@@ -12,6 +12,7 @@ from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
 from runduck.jobinfo import read_environment
 from runduck.jobinfo import get_job_details
+from runduck.jobinfo import combine_data
 
 
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -24,17 +25,34 @@ parser.add_argument(
     help="Skip cache and force getting data from source")
 
 @api.route("/jobs")
-class Projects(Resource):
-
+class Jobs(Resource):
     @api.expect(parser)
     def get(self):
+        """
+        List all jobs from all environments
+        """
         interaction = DataInteraction()
         data = interaction.get_data("combined")
         return jsonify(data)
+
+@api.route("/jobs/combine")
+class JobsCombine(Resource):
+    """Recombine all the data for the Jobs API from the raw data"""
+    @api.expect(parser)
+    def post(self):
+        """Prepare all the data for the APIs
+        This takes a few seconds if the raw data is already cached, it will
+        take several minutes if the data is being refreshed from the source
+        """
+        combine_data()
+        return jsonify({"message": "Data successfully combined"})
 
 @api.route("/job/<string:env>/<string:jobid>")
 class Job(Resource):
     """Get details of a job"""
     def get(self, env, jobid):
+        """
+        Get details of one job in a specific environment
+        """
         data = get_job_details(env=env, job_id=jobid)
         return jsonify(data)

@@ -112,14 +112,14 @@ def append_info(job, project, env, env_order):
         "name",
         "scheduleEnabled",
         "executionEnabled",
-        "description"
+        "description",
+        "permalink"
     ]
     for field in fields_to_include:
         job_info[field] = job[field]
 
     job_info["project_name"] = project["name"]
     job_info["project_description"] = project["description"]
-    job_info["project_url"] = project["url"]
     job_info["env"] = env
     job_info["env_order"] = env_order
     job_info["id"] = f"{env}.{job['id']}"
@@ -160,8 +160,8 @@ def get_job_details(env, job_id, live_data_source=DataSource.API):
     job_metadata.update(next(iter(job_definition)))
     return job_metadata
 
-def combine_data():
-    raw_data = read_all_environments()
+def combine_data(force_refresh=False):
+    raw_data = read_all_environments(force_refresh=force_refresh)
     all_jobs = []
 
     # go over each environment
