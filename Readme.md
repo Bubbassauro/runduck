@@ -8,6 +8,14 @@ Runduck reads the job configurations using the [Rundeck API](https://docs.rundec
 
 The UI also allows you to refresh the metadata for individual jobs on-demand.
 
+Here's a quick demo:
+
+![Runduck demo](doc/runduck_demo.gif "Runduck Demo")
+
+It works with a light version depending on your settings:
+
+![Runduck screenshot](doc/runduck_light.png "Runduck Screenshot Light")
+
 ## Configuration
 
 Create an **app.cfg** file in the root folder.
