@@ -54,6 +54,8 @@ ENV={
 
 ## Running Runduck
 
+### Running locally
+
 1. As a best practice, create a virtual environement:
 `python3 -m venv venv` 
 2. Activate the environment:
@@ -62,6 +64,18 @@ ENV={
 `pip install -r requirements.txt`
 4. Running in development:
 `python run.py`
+
+### Docker
+
+Replace `public_url` with the base url for the application (for the references to static files in the UI build)
+
+```bash
+docker image build . \
+--build-arg aws_access_key_id=****** \
+--build-arg aws_secret_access_key=****** \
+--build-arg config_path=s3://********/runduck \
+--build-arg public_url=http://localhost:3825
+```
 
 ### Importing the Data
 
