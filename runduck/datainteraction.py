@@ -179,6 +179,10 @@ class DataInteraction(object):
                 return {"source": DataSource.REDIS.value, "data": data}
 
         source = self.live_data_source
+        if not self.CONFIG[data_key].get(source):
+            # Data not available from the source
+            return {"source": None, "data": None}
+
         if self.live_data_source == DataSource.FILE_SYSTEM:
             data = self.get_filesystem(data_key, **args)
         else:
