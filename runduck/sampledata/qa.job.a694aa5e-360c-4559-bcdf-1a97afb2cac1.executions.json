@@ -1,0 +1,42 @@
+{
+    "paging": {
+        "count": 1,
+        "total": 158,
+        "offset": 0,
+        "max": 1
+    },
+    "executions": [
+        {
+            "id": 5947487,
+            "href": "http://sample_location/rundeck/api/24/execution/5947487",
+            "permalink": "http://sample_location/rundeck/project/App-Integrations/execution/show/5947487",
+            "status": "succeeded",
+            "project": "App-Integrations",
+            "executionType": "scheduled",
+            "user": "admin",
+            "date-started": {
+                "unixtime": 1587333900143,
+                "date": "2020-04-19T22:05:00Z"
+            },
+            "date-ended": {
+                "unixtime": 1587334332652,
+                "date": "2020-04-19T22:12:12Z"
+            },
+            "job": {
+                "id": "a694aa5e-360c-4559-bcdf-1a97afb2cac1",
+                "averageDuration": 468018,
+                "name": "newsky daily run",
+                "group": "newsky",
+                "project": "App-Integrations",
+                "description": "",
+                "href": "http://sample_location/rundeck/api/24/job/a694aa5e-360c-4559-bcdf-1a97afb2cac1",
+                "permalink": "http://sample_location/rundeck/project/App-Integrations/job/show/a694aa5e-360c-4559-bcdf-1a97afb2cac1"
+            },
+            "description": "source /usr/local/dashboard-scripts/venv/bin/activate && cd /usr/local/dashboard-scripts && python -u -m newsky.daily_run ('newsky_daily_run')",
+            "argstring": null,
+            "successfulNodes": [
+                "rundeck_qa"
+            ]
+        }
+    ]
+}

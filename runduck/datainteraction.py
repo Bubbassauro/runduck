@@ -65,6 +65,15 @@ class DataInteraction(object):
                     "field": "definition",
                 },
             },
+            "job.executions": {
+                "format": "json",
+                DataSource.API: "/api/24/job/{jobid}/executions",
+                DataSource.FILE_SYSTEM: "{env}.job.{jobid}.executions.json",
+                DataSource.REDIS: {
+                    "key": "runduck:{env}:jobs:{jobid}",
+                    "field": "executions",
+                },
+            },
             # This is where all the combined data for the API will be stored (redis only)
             "combined": {
                 "format": "json",
