@@ -17,6 +17,8 @@ from runduck.jobinfo import get_last_execution
 
 
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
+app.config["PROPAGATE_EXCEPTIONS"] = False
 api = Api(app, version="1.0", doc="/api/doc", prefix="/api", validate=False)
 
 parser = reqparse.RequestParser()

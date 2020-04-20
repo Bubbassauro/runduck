@@ -184,7 +184,7 @@ def get_last_execution(
         jobid=job_id,
         max=1,  # only using the last execution for now
     ).get("data")
-    if response and response["paging"]["count"] >= 0:
+    if get_object_property(response, "paging.count", 0) > 0:
         execution = next(iter(response["executions"]))
 
         # Append duration
@@ -193,7 +193,7 @@ def get_last_execution(
             get_object_property(execution, "date-ended.date"),
         )
         return execution
-    return None
+    return {}
 
 
 def combine_data(force_refresh=False):
