@@ -18,7 +18,6 @@ from runduck.jobinfo import get_last_execution
 
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
-app.config["PROPAGATE_EXCEPTIONS"] = False
 api = Api(app, version="1.0", doc="/api/doc", prefix="/api", validate=False)
 
 parser = reqparse.RequestParser()
@@ -29,6 +28,11 @@ parser.add_argument(
     type=inputs.boolean,
     help="Skip cache and force getting data from source",
 )
+
+
+@api.errorhandler
+def default_error_handler(error):
+    return {"message": str(error)}, getattr(error, "code", 500)
 
 
 @api.route("/jobs")
