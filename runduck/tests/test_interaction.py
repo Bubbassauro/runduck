@@ -78,8 +78,10 @@ class DataInteractionTestCase(unittest.TestCase):
         uncomment skip annotation and run with:
         python -m pytest -v -s -k bad_guy --disable-pytest-warnings
         """
-        bad_guy = self.interaction.get_api("job.definition", jobid="cc1f5a09-0c54-4b7e-972d-e5baaba0a1be")
+        bad_guy = self.interaction.get_api(
+            "job.definition", jobid="cc1f5a09-0c54-4b7e-972d-e5baaba0a1be"
+        )
 
     def test_get_now_str(self):
         now_str = get_now_str()
-        assert len(now_str) == 22
+        assert len(now_str) == 24

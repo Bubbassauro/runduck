@@ -23,7 +23,7 @@ def favicon():
 
 @app.route("/manifest.json")
 def manifest():
-    print(build_path)
+    # print(build_path)
     return send_from_directory(build_path, "manifest.json")
 
 

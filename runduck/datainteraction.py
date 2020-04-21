@@ -18,10 +18,12 @@ class DataSource(Enum):
     FILE_SYSTEM = "fs"
     REDIS = "redis"
 
+
 def get_now_str():
     """Get the current timestamp"""
     now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
     return f"{now_utc:%Y-%m-%dT%H:%M:%S%z}"
+
 
 class DataInteraction(object):
     """Common object to read data from redis or from file system or API"""
@@ -54,7 +56,7 @@ class DataInteraction(object):
                 DataSource.REDIS: {
                     "key": "runduck:{env}:jobs:{jobid}",
                     "field": "metadata",
-                }
+                },
             },
             "job.definition": {
                 "format": "yaml",
@@ -63,6 +65,15 @@ class DataInteraction(object):
                 DataSource.REDIS: {
                     "key": "runduck:{env}:jobs:{jobid}",
                     "field": "definition",
+                },
+            },
+            "job.executions": {
+                "format": "json",
+                DataSource.API: "/api/24/job/{jobid}/executions",
+                DataSource.FILE_SYSTEM: "{env}.job.{jobid}.executions.json",
+                DataSource.REDIS: {
+                    "key": "runduck:{env}:jobs:{jobid}",
+                    "field": "executions",
                 },
             },
             # This is where all the combined data for the API will be stored (redis only)
@@ -125,7 +136,7 @@ class DataInteraction(object):
         url = f"{base_url}{self.CONFIG[data_key][DataSource.API]}".format(**params)
         # print(url, params)
         resp = requests.get(url, headers=headers, params=params)
-        resp.raise_for_status()
+        # resp.raise_for_status()
         if response_format == "json":
             return resp.json()
         else:
@@ -179,6 +190,10 @@ class DataInteraction(object):
                 return {"source": DataSource.REDIS.value, "data": data}
 
         source = self.live_data_source
+        if not self.CONFIG[data_key].get(source):
+            # Data not available from the source
+            return {"source": None, "data": None}
+
         if self.live_data_source == DataSource.FILE_SYSTEM:
             data = self.get_filesystem(data_key, **args)
         else:
