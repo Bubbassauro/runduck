@@ -44,19 +44,22 @@ class JobInfoTestCase(unittest.TestCase):
         data = combine_data()
 
     def test_append_project_info(self):
-        job = {"id": "dbaa0ddb-596b-410d-9fa1-a96166724699", "name": "analyze"}
+        job = {
+            "id": "dbaa0ddb-596b-410d-9fa1-a96166724699",
+            "name": "analyze",
+            "uuid": "dbaa0ddb-596b-410d-9fa1-a96166724699",
+        }
         project = {
             "description": "Administrative jobs",
             "name": "Admin",
             "url": "http://devops.equinoxfitness.com/rundeck/api/24/project/Admin",
         }
-        job_project = append_info(job=job, project=project, env="prod")
+        job_project = append_info(job=job, project=project, env="prod", env_order=0)
         assert "project_name" in job_project
         assert "project_description" in job_project
-        assert "project_url" in job_project
         assert "id" in job_project
         assert "env" in job_project
-        assert "euid" in job_project  # unique id across all environments
+        assert "uuid" in job_project  # unique id across all environments
 
     def test_find_job(self):
         jobs = [
@@ -64,14 +67,14 @@ class JobInfoTestCase(unittest.TestCase):
                 "uuid": "c7d3aea1-28af-4c14-9580-3792fe0e52f0",
                 "name": "cache_rd",
                 "id": "prod.c7d3aea1-28af-4c14-9580-3792fe0e52f0",
-                "project": "Admin",
+                "project_name": "Admin",
                 "group": "",
             },
             {
                 "uuid": "54e63594-d520-42f0-8ec9-bbb3651fab43",
                 "name": "cache_rd_dashboard_intraday",
                 "id": "prod.54e63594-d520-42f0-8ec9-bbb3651fab43",
-                "project": "Admin",
+                "project_name": "Admin",
                 "group": "",
             },
         ]
@@ -81,7 +84,7 @@ class JobInfoTestCase(unittest.TestCase):
             "uuid": "c7d3aea1-28af-4c14-9580-3792fe0e52f0",
             "name": "cache_rd_dashboard_summary",
             "id": "prod.c7d3aea1-28af-4c14-9580-3792fe0e52f0",
-            "project": "Admin",
+            "project_name": "Admin",
             "group": "",
         }
         job_by_id = find_job(jobs, job_by_id)
@@ -92,7 +95,7 @@ class JobInfoTestCase(unittest.TestCase):
             "uuid": "54e63594-d520-42f0-8ec9-bbb3651fab43",
             "name": "cache_rd_dashboard_intraday",
             "id": "prod.54e63594-d520-42f0-8ec9-bbb3651fab43",
-            "project": "Admin",
+            "project_name": "Admin",
             "group": "",
         }
         job_by_name = find_job(jobs, job_by_name)

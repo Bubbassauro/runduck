@@ -121,7 +121,7 @@ def append_info(job, project, env, env_order):
         "permalink",
     ]
     for field in fields_to_include:
-        job_info[field] = job[field]
+        job_info[field] = job.get(field)
 
     job_info["project_name"] = project["name"]
     job_info["project_description"] = project["description"]
