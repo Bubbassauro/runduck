@@ -1,6 +1,9 @@
 """General helper functions"""
 import re
 import dateutil.parser
+import croniter
+from datetime import datetime
+from cron_descriptor import get_description
 
 
 def get_object_property(obj, property_list, default=None):
@@ -42,3 +45,45 @@ def get_elapsed_time(start_date, end_date):
         formatted = f"{hms['hours']}h "
     formatted = f"{formatted}{hms['minutes']}m {hms['seconds']}s"
     return formatted
+
+
+def get_cron(schedule):
+    if not schedule:
+        return ""
+
+    minute, hour, seconds, dayofmonth, month, weekday = "*", "*", "*", "*", "*", "*"
+    if schedule.get("time"):
+        if schedule["time"].get("minute"):
+            minute = schedule["time"]["minute"]
+            # format in a way that croniter understands
+            minute = re.sub(r",$", "", minute)  # "0," -> "0"
+            minute = re.sub(r"^0{,1}/", "*/", minute)  # "0/5" or "/5" -> "*/5"
+
+        if schedule["time"].get("hour"):
+            hour = schedule["time"]["hour"]
+        if schedule["time"].get("seconds"):
+            seconds = schedule["time"]["seconds"]
+
+    if schedule.get("month"):
+        month = schedule["month"]
+
+    if schedule.get("dayofmonth"):
+        if schedule["dayofmonth"]["day"]:
+            dayofmonth = schedule["dayofmonth"]["day"]
+
+    if schedule.get("weekday"):
+        if schedule["weekday"].get("day"):
+            weekday = schedule["weekday"]["day"]
+
+    cron = f"{minute} {hour} {dayofmonth} {month} {weekday}"
+    return cron
+
+
+def get_next_execution(cron):
+    """Get next execution as ISO date"""
+    if not cron:
+        return None
+
+    cron = croniter.croniter(cron, datetime.now())
+    nextdate = cron.get_next(datetime)
+    return nextdate.isoformat()

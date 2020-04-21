@@ -6,6 +6,7 @@ from runduck.datainteraction import DataInteraction
 from runduck import app
 from runduck.utils import get_elapsed_time
 from runduck.utils import get_object_property
+from runduck.utils import get_cron
 
 
 def read_environment(live_data_source, force_refresh=False, env="qa"):
@@ -68,41 +69,6 @@ def read_all_environments(live_data_source=DataSource.API, force_refresh=False):
     return all_data
 
 
-def format_schedule_description(schedule):
-    if not schedule:
-        return ""
-
-    minute, hour, seconds, dayofmonth, month, weekday = "*", "*", "*", "*", "*", "*"
-    if schedule.get("time"):
-        if schedule["time"].get("minute"):
-            minute = schedule["time"]["minute"]
-        if schedule["time"].get("hour"):
-            hour = schedule["time"]["hour"]
-        if schedule["time"].get("seconds"):
-            seconds = schedule["time"]["seconds"]
-
-    if schedule.get("month"):
-        month = schedule["month"]
-
-    if schedule.get("dayofmonth"):
-        if schedule["dayofmonth"]["day"]:
-            dayofmonth = schedule["dayofmonth"]["day"]
-
-    if schedule.get("weekday"):
-        if schedule["weekday"].get("day"):
-            weekday = schedule["weekday"]["day"]
-
-    cron = f"{minute} {hour} {dayofmonth} {month} {weekday}"
-
-    try:
-        formatted = get_description(cron)
-    except:
-        formatted = cron
-        raise
-
-    return formatted
-
-
 def append_info(job, project, env, env_order):
     """Add project and environment info
     Also include:
@@ -129,19 +95,19 @@ def append_info(job, project, env, env_order):
     job_info["env_order"] = env_order
     job_info["id"] = f"{env}.{job['id']}"
 
-    try:
-        job_info["schedule_description"] = format_schedule_description(
-            job.get("schedule")
-        )
-    except:
-        CRED = "\33[31m"
-        CEND = "\033[0m"
-        print(
-            CRED,
-            f"\nError getting schedule description for {project['name']} / {job['group']} / {job['name']}",
-            CEND,
-        )
-        print(job.get("schedule"))
+    job_info["cron"] = get_cron(job.get("schedule"))
+    if job.get("cron"):
+        try:
+            job_info["schedule_description"] = get_description(job_info["cron"])
+        except:
+            CRED = "\33[31m"
+            CEND = "\033[0m"
+            print(
+                CRED,
+                f"\nError getting schedule description for {project['name']} / {job['group']} / {job['name']}",
+                CEND,
+            )
+            print(job.get("cron"))
 
     return job_info
 
