@@ -5,6 +5,7 @@ import unittest
 import pytest
 from runduck.utils import get_elapsed_time
 from runduck.utils import get_object_property
+from runduck.utils import convert_hour_range
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -29,3 +30,7 @@ class UtilsTestCase(unittest.TestCase):
         assert get_object_property(obj, "date-started.date") == "2020-04-19T22:05:00Z"
         assert get_object_property(obj, "date-started.mising", "abc") == "abc"
         assert get_object_property(obj, "missing") is None
+
+    def test_convert_hour_range(self):
+        assert convert_hour_range("9-8") == "9-23,0-8"
+        assert convert_hour_range("7-02/1") == "7-23/1,0-2/1"

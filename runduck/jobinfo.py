@@ -7,6 +7,7 @@ from runduck import app
 from runduck.utils import get_elapsed_time
 from runduck.utils import get_object_property
 from runduck.utils import get_cron
+from runduck.utils import get_next_execution
 
 
 def read_environment(live_data_source, force_refresh=False, env="qa"):
@@ -25,7 +26,7 @@ def read_environment(live_data_source, force_refresh=False, env="qa"):
     interaction = DataInteraction(live_data_source=live_data_source, env=env)
     projects = interaction.get_data("projects").get("data")
     for project_i, project in enumerate(projects):
-        print(
+        app.logger.info(
             f"[{env}] Reading jobs from {project_i + 1} of {len(projects)}: {project['name']}"
         )
         jobs = interaction.get_data(
@@ -100,14 +101,10 @@ def append_info(job, project, env, env_order):
         try:
             job_info["schedule_description"] = get_description(job_info["cron"])
         except:
-            CRED = "\33[31m"
-            CEND = "\033[0m"
-            print(
-                CRED,
-                f"\nError getting schedule description for {project['name']} / {job['group']} / {job['name']}",
-                CEND,
+            app.logger.error(
+                f"Error getting schedule description for {project['name']} / {job['group']} / {job['name']}",
             )
-            print(job.get("cron"))
+            app.logger.info(f"cron: {job.get('cron')}")
 
     return job_info
 
@@ -168,7 +165,7 @@ def combine_data(force_refresh=False):
 
     # go over each environment
     for index, env in enumerate(raw_data):
-        print(f"processing {index}: {env}")
+        app.logger.info(f"processing {index}: {env}")
         for project in raw_data[env]:
             for job in project["jobs"]:
                 job_info = append_info(
@@ -195,4 +192,40 @@ def combine_data(force_refresh=False):
 
     interaction = DataInteraction()
     interaction.set_redis("combined", all_jobs)
-    print("DONE!")
+    app.logger.info("DONE!")
+
+
+def append_next_execution(row):
+    """Append next execution date, if job is enabled to run"""
+    if (
+        row.get("scheduleEnabled", False)
+        and row.get("executionEnabled", False)
+        and row.get("cron")
+    ):
+        try:
+            row["next_execution"] = get_next_execution(row.get("cron"))
+        except Exception as ex:
+            row["next_execution"] = None
+            app.logger.info("")
+            app.logger.info(f'{row["env"]} {row["uuid"]} {type(ex)}')
+            app.logger.error(ex)
+            if row.get("cron"):
+                try:
+                    app.logger.info(get_description(row["cron"]))
+                except Exception as ex:
+                    app.logger.error(ex)
+    else:
+        row["next_execution"] = None
+    return row
+
+
+def get_jobs(force_refresh=False):
+    """Get combined job list
+    Reads combined data from cache, but appends next execution because it's
+    calculated with the current date
+    """
+    interaction = DataInteraction()
+    data = interaction.get_data("combined", force_refresh=force_refresh)
+    for row in data["data"]:
+        row = append_next_execution(row)
+    return data
