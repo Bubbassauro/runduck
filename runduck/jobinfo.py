@@ -96,7 +96,7 @@ def append_info(job, project, env, env_order):
     job_info["id"] = f"{env}.{job['id']}"
 
     job_info["cron"] = get_cron(job.get("schedule"))
-    if job.get("cron"):
+    if job_info.get("cron"):
         try:
             job_info["schedule_description"] = get_description(job_info["cron"])
         except:
