@@ -7,6 +7,7 @@ from flask_restplus import Api
 from flask_restplus import Resource
 from flask_restplus import reqparse
 from flask_restplus import inputs
+from cron_descriptor import get_description
 from runduck import app
 from runduck.datainteraction import DataSource
 from runduck.datainteraction import DataInteraction
@@ -14,6 +15,7 @@ from runduck.jobinfo import read_environment
 from runduck.jobinfo import get_job_details
 from runduck.jobinfo import combine_data
 from runduck.jobinfo import get_last_execution
+from runduck.jobinfo import get_jobs
 
 
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -44,8 +46,7 @@ class Jobs(Resource):
         """
         args = parser.parse_args()
         force_refresh = args.get("force_refresh", False)
-        interaction = DataInteraction()
-        data = interaction.get_data("combined", force_refresh=force_refresh)
+        data = get_jobs(force_refresh=force_refresh)
         return jsonify(data)
 
 
